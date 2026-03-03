@@ -25,6 +25,7 @@ interface PreviewRow {
 
 export default function Import() {
   const [importType, setImportType] = useState<'csv' | 'pdf'>('csv')
+  const [documentType, setDocumentType] = useState<'extrato' | 'fatura'>('extrato')
   const [step, setStep] = useState<Step>('upload')
   const [columns, setColumns] = useState<string[]>([])
   const [mapping, setMapping] = useState<Record<string, string>>({})
@@ -85,13 +86,13 @@ export default function Import() {
   }
 
   async function handleConfirm() {
-    // Validação client-side: conta ou cartão obrigatório
-    if (importType === 'csv' && !accountId && !cardId) {
-      toast('error', 'Selecione uma conta ou cartao de destino')
+    // Validação client-side: conta ou cartão obrigatório conforme tipo de documento
+    if (documentType === 'extrato' && !accountId) {
+      toast('error', 'Selecione a conta de destino')
       return
     }
-    if (importType === 'pdf' && !cardId) {
-      toast('error', 'Selecione o cartao de credito da fatura')
+    if (documentType === 'fatura' && !cardId) {
+      toast('error', 'Selecione o cartao de credito')
       return
     }
 
@@ -126,13 +127,15 @@ export default function Import() {
     setMapping({})
     setPreview([])
     setDuplicateCount(0)
+    setAccountId('')
+    setCardId('')
   }
 
   return (
     <div className="space-y-6 animate-fade-in">
       <Header title="Importar dados" subtitle="Importe transacoes de CSV, planilhas ou faturas PDF" />
 
-      {/* Type selector */}
+      {/* File format selector */}
       <div className="flex gap-3">
         <Card
           hover
@@ -144,7 +147,7 @@ export default function Import() {
           </div>
           <div>
             <p className="font-medium text-gray-800 dark:text-white">CSV / Planilha</p>
-            <p className="text-xs text-gray-400">Extrato bancario em CSV, XLSX ou XLS</p>
+            <p className="text-xs text-gray-400">Arquivo CSV, XLSX ou XLS</p>
           </div>
         </Card>
         <Card
@@ -156,30 +159,61 @@ export default function Import() {
             <FileText className="w-6 h-6 text-purple-600" />
           </div>
           <div>
-            <p className="font-medium text-gray-800 dark:text-white">PDF de Fatura</p>
-            <p className="text-xs text-gray-400">Fatura do cartao de credito em PDF</p>
+            <p className="font-medium text-gray-800 dark:text-white">PDF</p>
+            <p className="text-xs text-gray-400">Arquivo em formato PDF</p>
+          </div>
+        </Card>
+      </div>
+
+      {/* Document type selector */}
+      <div className="flex gap-3">
+        <Card
+          hover
+          onClick={() => { setDocumentType('extrato'); setCardId('') }}
+          className={`flex-1 flex items-center gap-4 cursor-pointer ${documentType === 'extrato' ? 'ring-2 ring-blue-500' : ''}`}
+        >
+          <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-xl">
+            <FileSpreadsheet className="w-6 h-6 text-blue-600" />
+          </div>
+          <div>
+            <p className="font-medium text-gray-800 dark:text-white">Extrato bancario</p>
+            <p className="text-xs text-gray-400">Transacoes de conta bancaria</p>
+          </div>
+        </Card>
+        <Card
+          hover
+          onClick={() => { setDocumentType('fatura'); setAccountId('') }}
+          className={`flex-1 flex items-center gap-4 cursor-pointer ${documentType === 'fatura' ? 'ring-2 ring-orange-500' : ''}`}
+        >
+          <div className="p-3 bg-orange-50 dark:bg-orange-900/30 rounded-xl">
+            <FileText className="w-6 h-6 text-orange-600" />
+          </div>
+          <div>
+            <p className="font-medium text-gray-800 dark:text-white">Fatura de cartao</p>
+            <p className="text-xs text-gray-400">Fatura do cartao de credito</p>
           </div>
         </Card>
       </div>
 
       {/* Account/Card selector */}
       <Card>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {documentType === 'extrato' ? (
           <Select
             label="Conta de destino"
             placeholder="Selecione uma conta..."
             value={accountId}
-            onChange={(e) => { setAccountId(e.target.value); if (e.target.value) setCardId('') }}
+            onChange={(e) => setAccountId(e.target.value)}
             options={accounts?.filter((a) => a.is_active).map((a) => ({ value: a.id, label: a.bank_name })) ?? []}
           />
+        ) : (
           <Select
             label="Cartao de destino"
             placeholder="Selecione um cartao..."
             value={cardId}
-            onChange={(e) => { setCardId(e.target.value); if (e.target.value) setAccountId('') }}
+            onChange={(e) => setCardId(e.target.value)}
             options={cards?.filter((c) => c.is_active).map((c) => ({ value: c.id, label: `${c.card_name} *${c.last_digits}` })) ?? []}
           />
-        </div>
+        )}
       </Card>
 
       {/* Steps */}

@@ -87,8 +87,8 @@ export async function pdfUpload(req: AuthRequest, res: Response) {
 
 export async function pdfConfirm(req: AuthRequest, res: Response) {
   try {
-    const { card_id, transactions } = req.body
-    const saved = await importService.confirmPdfImport(req.userId!, card_id, transactions)
+    const { account_id, card_id, transactions } = req.body
+    const saved = await importService.confirmPdfImport(req.userId!, account_id, card_id, transactions)
 
     // Trigger AI categorization in background
     const ids = (saved || []).map((t: { id: string }) => t.id)

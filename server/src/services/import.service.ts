@@ -133,13 +133,14 @@ Retorne APENAS um JSON array válido, sem markdown, no formato:
 
 export async function confirmPdfImport(
   userId: string,
-  cardId: string,
+  accountId: string | null | undefined,
+  cardId: string | null | undefined,
   transactions: ParsedTransaction[],
 ) {
   const rows = transactions.map(t => ({
     user_id: userId,
-    card_id: cardId,
-    account_id: null,
+    card_id: cardId || null,
+    account_id: accountId || null,
     amount: t.amount,
     type: t.type,
     description: t.description,
