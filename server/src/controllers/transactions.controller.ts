@@ -40,11 +40,18 @@ export async function remove(req: AuthRequest, res: Response) {
 
 export async function summary(req: AuthRequest, res: Response) {
   try {
-    const { month, year } = req.query as { month: string; year: string }
+    const { from, to, account_id, card_id } = req.query as {
+      from: string
+      to: string
+      account_id?: string
+      card_id?: string
+    }
     const data = await transactionsService.getTransactionSummary(
       req.userId!,
-      parseInt(month, 10),
-      parseInt(year, 10),
+      from,
+      to,
+      account_id,
+      card_id,
     )
     res.json(data)
   } catch (err) {

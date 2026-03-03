@@ -44,6 +44,8 @@ export const transactionFiltersSchema = z.object({
 })
 
 export const summaryQuerySchema = z.object({
-  month: z.coerce.number().int().min(1).max(12),
-  year: z.coerce.number().int().min(2000).max(2100),
+  from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  account_id: z.string().uuid().optional(),
+  card_id: z.string().uuid().optional(),
 })
