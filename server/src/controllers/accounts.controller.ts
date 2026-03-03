@@ -18,7 +18,7 @@ export async function create(req: AuthRequest, res: Response) {
     res.status(201).json(data)
   } catch (err) {
     console.error('[Accounts] Erro ao criar:', (err as Error).message)
-    res.status(500).json({ message: 'Erro ao criar conta. Verifique os dados e tente novamente.' })
+    res.status(500).json({ message: 'Erro ao criar conta. Verifique os dados e tente novamente.', debug: (err as Error).message })
   }
 }
 
