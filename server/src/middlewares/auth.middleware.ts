@@ -26,5 +26,20 @@ export async function authMiddleware(
   }
 
   req.userId = user.id
+
+  // Garante que o perfil existe (cobre casos onde o trigger não criou)
+  const { data: profile } = await supabaseAdmin
+    .from('fc_profiles')
+    .select('id')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile) {
+    await supabaseAdmin.from('fc_profiles').insert({
+      id: user.id,
+      full_name: user.user_metadata?.full_name || user.email || 'Usuário',
+    })
+  }
+
   next()
 }
