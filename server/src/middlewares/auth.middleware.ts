@@ -35,10 +35,15 @@ export async function authMiddleware(
     .single()
 
   if (!profile) {
-    await supabaseAdmin.from('fc_profiles').insert({
+    const { error: profileError } = await supabaseAdmin.from('fc_profiles').upsert({
       id: user.id,
       full_name: user.user_metadata?.full_name || user.email || 'Usuário',
-    })
+    }, { onConflict: 'id' })
+
+    if (profileError) {
+      console.error('[Auth] Erro ao criar perfil:', profileError.message)
+      return res.status(500).json({ message: 'Erro ao criar perfil do usuário' })
+    }
   }
 
   next()
